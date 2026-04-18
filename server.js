@@ -132,21 +132,54 @@ app.get("/api/users/:id", (req, res) => {
   res.status(200).json(userObj);
 });
 
-app.post("api/user", (req, res) => {
-  let obj = req.body;
+// app.post("api/user", (req, res) => {
+//   let obj = req.body;
 
-  if ((!obj, fname)) {
+//   if ((!obj, fname)) {
+//     return res.status(400).json({
+//       success: false,
+//       error: {
+//         code: "FIRST_NAME_REQUIRED",
+//         // message: `User with id ${id} not found`,
+//         message: `FIRST_NAME_IS_REQUIRED_FIELD`,
+//       },
+//     });
+//   }
+// });
+
+app.use(express.json()); // add this above routes
+
+app.post("/api/users", (req, res) => {
+  const { fname, lname, email, contact, userRole } = req.body;
+
+  // validation
+  if (!fname) {
     return res.status(400).json({
       success: false,
       error: {
         code: "FIRST_NAME_REQUIRED",
-        // message: `User with id ${id} not found`,
-        message: `FIRST_NAME_IS_REQUIRED_FIELD`,
+        message: "FIRST_NAME_IS_REQUIRED_FIELD",
       },
     });
   }
-});
 
+  // create new user
+  const newUser = {
+    id: Date.now().toString(),
+    fname,
+    lname,
+    email,
+    contact,
+    userRole,
+  };
+
+  users.push(newUser);
+
+  return res.status(201).json({
+    success: true,
+    data: newUser,
+  });
+});
 app.get("/api/users", (req, res) => {
   // let id = req.params.id
   res.status(200).json(users);
