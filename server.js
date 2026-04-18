@@ -95,7 +95,7 @@ function createCRUDRoutes(path, dataArray) {
   });
 }
 
-// ================= DATA (SAME VISHNU GANESH EVERYWHERE) =================
+// ================= DATA (SAME VISHNU  EVERYWHERE) =================
 
 // USERS
 let users = [
@@ -106,15 +106,7 @@ let users = [
     email: "vishnujirge@example.com",
     contact: "9876543210",
     userRole: "ADMIN",
-  },
-  {
-    id: "124",
-    fname: "Ganesh",
-    lname: "Bhalke",
-    email: "ganesh@example.com",
-    contact: "9988776655",
-    userRole: "USER",
-  },
+  }
 ];
 
 // TODOS
@@ -124,13 +116,7 @@ let todos = [
     title: "Learn Angular",
     completed: false,
     user: "Vishnu",
-  },
-  {
-    id: "124",
-    title: "Build Project",
-    completed: true,
-    user: "Ganesh",
-  },
+  }
 ];
 
 // POSTS
@@ -140,13 +126,7 @@ let posts = [
     title: "My First Post",
     content: "Hello from Vishnu",
     author: "Vishnu",
-  },
-  {
-    id: "124",
-    title: "Second Post",
-    content: "Hello from Ganesh",
-    author: "Ganesh",
-  },
+  }
 ];
 
 // MOVIES
@@ -156,13 +136,8 @@ let movies = [
     title: "KGF",
     rating: 9,
     actor: "Vishnu",
-  },
-  {
-    id: "124",
-    title: "Pushpa",
-    rating: 8,
-    actor: "Ganesh",
-  },
+  }
+
 ];
 
 // STUDENTS
@@ -170,15 +145,9 @@ let students = [
   {
     id: "123",
     name: "Vishnu",
-    age: 22,
-    course: "BCA",
-  },
-  {
-    id: "124",
-    name: "Ganesh",
-    age: 23,
-    course: "BSc",
-  },
+    age: 25 ,
+    course: "Angular Dev",
+  }
 ];
 
 // ================= APPLY GENERIC =================
