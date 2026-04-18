@@ -1,78 +1,104 @@
-const cl = console.log;
-// for geting http
-// const http = require('http')
-// insede node many module there but we import only http module to use it
-// const http = require("http");
+require("dotenv").config();
 
-cl("hi NodeJS");
-
-// userArr is DB
-// const users = [
-//   {
-//     id: "u1",
-//     fname: "Vishnu",
-//     lname: "Jirge",
-//     email: "vishnujirge@example.com",
-//     contact: "9876543210",
-//     userRole: "USER",
-//   },
-//   {
-//     id: "u3",
-//     fname: "Ganesh",
-//     lname: "Bhalke",
-//     email: "ganesh@example.com",
-//     contact: "9988776655",
-//     userRole: "USER",
-//   },
-// ];
-
-// if we run any app like angular that will run on port
-// localhost : 4200
-
-// React app will run on port like
-//localhost : 3000
-
-// we are runing this in local system not on host
-// we use this post
-
-// localhost//3000/postData
-// process.env.PORT || 3000; this will help like : vercel/port : it will allow to take that port/url
-// for deply env provede/ help
-// we dont use here express for now
-// ✅ dynamic port (important for deployment like :contentReference[oaicite:0]{index=0})
-
-// ❌
-// const PORT = process.env.PORT || 3000;
-
-// 👨‍💻method : GET and url = localhost://3000/api/users👨‍💻
-// FE send request BE - BE send Response
-
-// we are createing a server
-// ✅ create server with request handler
-//✅“The createServer method in Node.js accepts a callback function with request and
-// response parameters, which is used to handle incoming HTTP requests and send responses.”
-
-// const server = http.createServer((req , res)=>{
-//     if(req.url === "api/users" && req.method === "GET"){
-//             res.writeHead(200,{'Content-type':'application/json'})
-//             return res.end(users)
-//     }
-// })
-
-// ➡️now we use here express
-//express imported here
 const express = require("express");
-// cors is midellware  .. asscess proveded onlly this site now empty so it worky anywhere
-const cors = require("cors");   
-const { error } = require("node:console");
-// we created here an apk of express
-const app = express();
+const cors = require("cors");
 
-const PORT = 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-// userArr is DB
-const users = [
+app.use(express.json());
+
+// ================= AUTH =================
+const TOKEN = process.env.API_TOKEN || "mysecrettoken";
+
+function authMiddleware(req, res, next) {
+  const token = req.headers.authorization;
+
+  if (!token || token !== TOKEN) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  next();
+}
+
+// ================= GENERIC CRUD =================
+function createCRUDRoutes(path, dataArray) {
+  // GET ALL
+  app.get(`/api/${path}`, (req, res) => {
+    res.json({ success: true, data: dataArray });
+  });
+
+  // GET BY ID
+  app.get(`/api/${path}/:id`, (req, res) => {
+    const item = dataArray.find(i => i.id === req.params.id);
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: `${path} not found`,
+      });
+    }
+
+    res.json({ success: true, data: item });
+  });
+
+  // CREATE
+  app.post(`/api/${path}`, authMiddleware, (req, res) => {
+    const newItem = {
+      id: Date.now().toString(),
+      ...req.body,
+    };
+
+    dataArray.push(newItem);
+
+    res.status(201).json({ success: true, data: newItem });
+  });
+
+  // UPDATE
+  app.put(`/api/${path}/:id`, authMiddleware, (req, res) => {
+    const index = dataArray.findIndex(i => i.id === req.params.id);
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: `${path} not found`,
+      });
+    }
+
+    dataArray[index] = { ...dataArray[index], ...req.body };
+
+    res.json({ success: true, data: dataArray[index] });
+  });
+
+  // DELETE
+  app.delete(`/api/${path}/:id`, authMiddleware, (req, res) => {
+    const index = dataArray.findIndex(i => i.id === req.params.id);
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: `${path} not found`,
+      });
+    }
+
+    const deleted = dataArray.splice(index, 1);
+
+    res.json({
+      success: true,
+      message: `${path} deleted`,
+      data: deleted[0],
+    });
+  });
+}
+
+// ================= DATA (SAME VISHNU GANESH EVERYWHERE) =================
+
+// USERS
+let users = [
   {
     id: "123",
     fname: "Vishnu",
@@ -89,103 +115,85 @@ const users = [
     contact: "9988776655",
     userRole: "USER",
   },
+];
+
+// TODOS
+let todos = [
   {
-    id: "18777",
-    fname: "Vishnu",
-    lname: "Jirge",
-    email: "vishnujirge@example.com",
-    contact: "9876543210",
-    userRole: "ADMIN",
+    id: "123",
+    title: "Learn Angular",
+    completed: false,
+    user: "Vishnu",
+  },
+  {
+    id: "124",
+    title: "Build Project",
+    completed: true,
+    user: "Ganesh",
   },
 ];
 
-// app.get("/api/users/:id", (req, res) => {
-//   let id = req.params.id;
+// POSTS
+let posts = [
+  {
+    id: "123",
+    title: "My First Post",
+    content: "Hello from Vishnu",
+    author: "Vishnu",
+  },
+  {
+    id: "124",
+    title: "Second Post",
+    content: "Hello from Ganesh",
+    author: "Ganesh",
+  },
+];
 
-//   let userObj = users.find((u) => u.id === id);
+// MOVIES
+let movies = [
+  {
+    id: "123",
+    title: "KGF",
+    rating: 9,
+    actor: "Vishnu",
+  },
+  {
+    id: "124",
+    title: "Pushpa",
+    rating: 8,
+    actor: "Ganesh",
+  },
+];
 
-//   if (userObj) {
-//     return res.status(200).json(userObj);
-//   } else {
-//     return res.status(404).json({ message: "User not found" });
-//   }
-// });
+// STUDENTS
+let students = [
+  {
+    id: "123",
+    name: "Vishnu",
+    age: 22,
+    course: "BCA",
+  },
+  {
+    id: "124",
+    name: "Ganesh",
+    age: 23,
+    course: "BSc",
+  },
+];
 
-app.get("/api/users/:id", (req, res) => {
-  // :id colon means placeholder if you remove : then it is the string ... afte cansume .. have to send actual id .. we have to find that id obj
+// ================= APPLY GENERIC =================
+createCRUDRoutes("users", users);
+createCRUDRoutes("todos", todos);
+createCRUDRoutes("posts", posts);
+createCRUDRoutes("movies", movies);
+createCRUDRoutes("students", students);
 
-  // Get Users Id  from params
-  // destructuring of obj {id} also works
-  let id = req.params.id;
-  // userObj get
-  let userObj = users.find((u) => u.id === id);
-  if (!userObj) {
-    return res.status(404).json({
-      success: false,
-      error: {
-        code: "USER_NOT_FOUND",
-        message: `User with id ${id} not found`,
-      },
-    });
-  }
-
-  res.status(200).json(userObj);
+// ================= ROOT =================
+app.get("/", (req, res) => {
+  res.send("Generic CRUD API Running 🚀");
 });
 
-// app.post("api/user", (req, res) => {
-//   let obj = req.body;
-
-//   if ((!obj, fname)) {
-//     return res.status(400).json({
-//       success: false,
-//       error: {
-//         code: "FIRST_NAME_REQUIRED",
-//         // message: `User with id ${id} not found`,
-//         message: `FIRST_NAME_IS_REQUIRED_FIELD`,
-//       },
-//     });
-//   }
-// });
-
-app.use(express.json()); // add this above routes
-
-app.post("/api/users", (req, res) => {
-  const { fname, lname, email, contact, userRole } = req.body;
-
-  // validation
-  if (!fname) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: "FIRST_NAME_REQUIRED",
-        message: "FIRST_NAME_IS_REQUIRED_FIELD",
-      },
-    });
-  }
-
-  // create new user
-  const newUser = {
-    id: Date.now().toString(),
-    fname,
-    lname,
-    email,
-    contact,
-    userRole,
-  };
-
-  users.push(newUser);
-
-  return res.status(201).json({
-    success: true,
-    data: newUser,
-  });
-});
-app.get("/api/users", (req, res) => {
-  // let id = req.params.id
-  res.status(200).json(users);
-});
-
-// we are listen that app on port 3000
+// ================= SERVER =================
 app.listen(PORT, () => {
-  cl(`application is runing on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

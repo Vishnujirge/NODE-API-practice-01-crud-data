@@ -62,11 +62,15 @@ cl("hi NodeJS");
 // ➡️now we use here express
 //express imported here
 const express = require("express");
+// cors is midellware  .. asscess proveded onlly this site now empty so it worky anywhere
+const cors = require("cors");   
 const { error } = require("node:console");
 // we created here an apk of express
 const app = express();
+
 const PORT = 3000;
 
+app.use(cors());
 // userArr is DB
 const users = [
   {
@@ -75,7 +79,7 @@ const users = [
     lname: "Jirge",
     email: "vishnujirge@example.com",
     contact: "9876543210",
-    userRole: "USER",
+    userRole: "ADMIN",
   },
   {
     id: "124",
@@ -84,6 +88,14 @@ const users = [
     email: "ganesh@example.com",
     contact: "9988776655",
     userRole: "USER",
+  },
+  {
+    id: "18777",
+    fname: "Vishnu",
+    lname: "Jirge",
+    email: "vishnujirge@example.com",
+    contact: "9876543210",
+    userRole: "ADMIN",
   },
 ];
 
@@ -103,6 +115,7 @@ app.get("/api/users/:id", (req, res) => {
   // :id colon means placeholder if you remove : then it is the string ... afte cansume .. have to send actual id .. we have to find that id obj
 
   // Get Users Id  from params
+  // destructuring of obj {id} also works
   let id = req.params.id;
   // userObj get
   let userObj = users.find((u) => u.id === id);
@@ -119,6 +132,54 @@ app.get("/api/users/:id", (req, res) => {
   res.status(200).json(userObj);
 });
 
+// app.post("api/user", (req, res) => {
+//   let obj = req.body;
+
+//   if ((!obj, fname)) {
+//     return res.status(400).json({
+//       success: false,
+//       error: {
+//         code: "FIRST_NAME_REQUIRED",
+//         // message: `User with id ${id} not found`,
+//         message: `FIRST_NAME_IS_REQUIRED_FIELD`,
+//       },
+//     });
+//   }
+// });
+
+app.use(express.json()); // add this above routes
+
+app.post("/api/users", (req, res) => {
+  const { fname, lname, email, contact, userRole } = req.body;
+
+  // validation
+  if (!fname) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: "FIRST_NAME_REQUIRED",
+        message: "FIRST_NAME_IS_REQUIRED_FIELD",
+      },
+    });
+  }
+
+  // create new user
+  const newUser = {
+    id: Date.now().toString(),
+    fname,
+    lname,
+    email,
+    contact,
+    userRole,
+  };
+
+  users.push(newUser);
+
+  return res.status(201).json({
+    success: true,
+    data: newUser,
+  });
+});
 app.get("/api/users", (req, res) => {
   // let id = req.params.id
   res.status(200).json(users);
